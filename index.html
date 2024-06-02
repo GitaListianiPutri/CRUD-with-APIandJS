@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        table, tr, th, td {
+            border: 1px solid black;
+            padding:  5px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Aplikasi Pendataan Mahasiswa</h2>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Eos?</p>
+    <div>
+        <input type="text" id="nama" placeholder="Masukkan Nama">
+        <input type="text" id="kelas" placeholder="Masukkan Kelas">
+    <select id="prodi">
+        <option>Pilih Prodi</option>
+        <option value="Teknik Informatika">Teknik Informatika</option>
+        <option value="RKS">RKS</option>
+        <option value="TRM">TRM</option>
+        <option value="Akuntasi">Akuntasi</option>
+    </select>
+    <button id="button" onclick="saveData()">Simpan</button>
+    </div>
+    <table style="margin-top: 15px">
+        <thead>
+           <tr>
+            <th>No</th>
+            <th>Nama</th>
+            <th>Kelas</th>
+            <th>Program Studi</th>
+            <th>Action</th>
+           </tr> 
+        </thead>
+        <tbody id="result">
+            
+            
+        </tbody>
+    </table>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+
+
+
+        const editData = async (id, nama, kelas, prodi) => {
+           document.getElementById('nama').value = nama;
+            document.getElementById('kelas').value = kelas;
+            document.getElementById('prodi').value = prodi;
+            document.getElementById('button').innerText = 'Ubah';
+            document.getElementById('button').setAttribute('onclick', `updateData('${id}')`);
+        }
+
+        const updateData = async (id) => {
+            let nama = document.getElementById('nama').value;
+            let kelas = document.getElementById('kelas').value;
+            let prodi = document.getElementById('prodi').value;
+            let data = {
+                nama: nama,
+                kelas: kelas,
+                prodi: prodi
+            };
+            await axios.patch(`http://localhost:3000/students/${id}`, data)
+            .then((response) => {
+                console.log(response);
+            })
+            .catch((error) => {
+                console.log(error.message);
+            });
+        }
+
+
+        const saveData = async () => {
+            let nama = document.getElementById('nama').value;
+            let kelas = document.getElementById('kelas').value;
+            let prodi = document.getElementById('prodi').value;
+            let data = {
+                nama: nama,
+                kelas: kelas,
+                prodi: prodi
+            };
+            await axios.post(`http://localhost:3000/students`, data)
+            .then((response) => {
+                console.log(response);
+            })
+            .catch((error) => {
+                console.log(error.message);
+            });
+        }
+
+
+
+
+        const deleteData = async(id) => {
+            await axios.delete(`http://localhost:3000/students/${id}`)
+            .then((response) => {
+                console.log(response);
+            })
+            .catch((error) => {
+                console.log(error.message);
+            });
+        }
+
+
+        // aro function
+        const getData = async () => {
+            await axios.get('http://localhost:3000/students')
+            .then((response) => {
+                let bucket = ``;
+                // response.data ditampung di variabel students
+                let students = response.data;
+
+
+                if (students.length > 0) {
+                    for (let i = 0; i < students.length; i++) {
+                   bucket += `
+                    <tr>
+                    <td>${i + 1}</td>
+                    <td>${students[i].nama}</td>
+                    <td>${students[i].kelas}</td>
+                    <td>${students[i].prodi}</td>
+                    <td>
+                        <button onclick="editData('${students[i].id}','${students[i].nama}','${students[i].kelas}','${students[i].prodi}')">Edit</button>
+                        <button onclick="deleteData(${students[i].id})">Delete</button>
+                    </td>
+                    </tr>
+                   `
+                }
+                } else {
+                    bucket += `
+                        <tr>
+                        <td colspan="5" style="text-align: center">Data tidak ditemukan</td>
+                        </tr>
+                        `
+                }
+                
+                document.getElementById('result').innerHTML = bucket;
+                
+            })
+            .catch((error) => {
+                let bucket = `
+                        <tr>
+                        <td colspan="5" style="text-align: center">Data tidak ditemukan</td>
+                        </tr>
+                        `;
+
+                document.getElementById('result').innerHTML = bucket;
+            }); 
+        }
+        getData();
+    </script>
+</body>
+</html>
